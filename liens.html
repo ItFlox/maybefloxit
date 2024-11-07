@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaybeFloxit</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            font-family: 'Courier New', monospace;
+            color: #0f0;
+            overflow: hidden;
+        }
+
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .window {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .title-bar {
+            background: #0f0;
+            padding: 10px;
+            cursor: move;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            margin: 0;
+            color: #000;
+            font-size: 18px;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .control-button {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+        }
+
+        .close { background: #ff5f56; }
+        .minimize { background: #ffbd2e; }
+        .maximize { background: #27c93f; }
+
+        .content {
+            padding: 20px;
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 2px solid #0f0;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            text-decoration: none;
+            color: #0f0;
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: rgba(0, 255, 0, 0.1);
+            transform: translateX(10px);
+        }
+
+        .social-link img {
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+            filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-bg"></canvas>
+    
+    <div class="window">
+        <div class="title-bar">
+            <h1 class="title">MaybeFloxit_Terminal.exe</h1>
+            <div class="window-controls">
+                <button class="control-button minimize"></button>
+                <button class="control-button maximize"></button>
+                <button class="control-button close"></button>
+            </div>
+        </div>
+        <div class="content">
+            <div class="profile-section">
+                <img class="profile-pic" src="https://maybeflo.pw/@mayb_files/3ba5f4a4-8235-457c-84e4-5b12c314354d.gif" alt="Profile Picture">
+            </div>
+            <div class="social-links">
+                <a href="https://www.twitch.tv/maybefloxit" class="social-link" data-url="https://twitch.tv/">
+                    <img src="https://cdn-icons-png.flaticon.com/512/5968/5968819.png" alt="Twitch">
+                    Twitch
+                </a>
+                <a href="https://www.youtube.com/@itwasfloxit" class="social-link" data-url="https://youtube.com/">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube">
+                    YouTube
+                </a>
+                <a href="https://tiktok.com" class="social-link" data-url="https://tiktok.com/">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok">
+                    TikTok
+                </a>
+                <a href="https://discord.gg/8QJaJNMYCm" class="social-link" data-url="https://discord.com/">
+                    <img src="https://cdn-icons-png.flaticon.com/512/5968/5968756.png" alt="Discord">
+                    Discord
+                </a>
+                <a href="https://github.com/ItFlox" class="social-link" data-url="https://github.com/">
+                    <img src="https://cdn-icons-png.flaticon.com/512/733/733553.png" alt="GitHub">
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Matrix Rain Effect
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const fontSize = 14;
+        const columns = canvas.width/fontSize;
+        const drops = [];
+
+        for(let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px monospace';
+
+            for(let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+                
+                if(drops[i]*fontSize > canvas.height && Math.random() > 0.975)
+                    drops[i] = 0;
+                
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 33);
+
+        // Window Dragging Functionality
+        const window = document.querySelector('.window');
+        const titleBar = document.querySelector('.title-bar');
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+
+        titleBar.addEventListener('mousedown', dragStart);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', dragEnd);
+
+        function dragStart(e) {
+            initialX = e.clientX - window.offsetLeft;
+            initialY = e.clientY - window.offsetTop;
+            isDragging = true;
+        }
+
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                window.style.left = currentX + 'px';
+                window.style.top = currentY + 'px';
+            }
+        }
+
+        function dragEnd() {
+            isDragging = false;
+        }
+
+        // Window Controls
+        document.querySelector('.close').addEventListener('click', () => {
+            window.style.display = 'none';
+        });
+
+        document.querySelector('.minimize').addEventListener('click', () => {
+            window.style.transform = 'scale(0.8)';
+            setTimeout(() => window.style.transform = 'scale(1)', 300);
+        });
+
+        document.querySelector('.maximize').addEventListener('click', () => {
+            window.style.transform = 'scale(1.1)';
+            setTimeout(() => window.style.transform = 'scale(1)', 300);
+        });
+    </script>
+</body>
+</html>

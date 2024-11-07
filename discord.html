@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rejoindre le Discord</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #36393f;
+            font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        #spider-web {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .join-section {
+            background: rgba(47, 49, 54, 0.9);
+            padding: 30px;
+            border-radius: 8px;
+            width: 450px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .join-section h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .server-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .server-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            margin-right: 20px;
+            background: #202225;
+        }
+
+        .join-button {
+            background: #5865f2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .join-button:hover {
+            background: #4752c4;
+        }
+
+        .widget-section {
+            margin-left: 40px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="spider-web"></canvas>
+
+    <div class="container">
+        <div class="join-section">
+            <h1>Tu as été invité à rejoindre un serveur</h1>
+            <div class="server-info">
+                <div class="server-icon"></div>
+                <div class="server-details">
+                    <h2>MaybeFloxit</h2>
+                    <p>Enfaite juste le serveur pour l'IA²</p>
+                </div>
+            </div>
+            <button class="join-button" onclick="window.location.href='https://discord.com/invite/8QJaJNMYCm'">
+                Accepter l'invitation
+            </button>
+        </div>
+
+        <div class="widget-section">
+            <iframe src="https://discord.com/widget?id=1128064519084720158&theme=dark" 
+                    width="350" 
+                    height="500" 
+                    allowtransparency="true" 
+                    frameborder="0" 
+                    sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts">
+            </iframe>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('spider-web');
+        const ctx = canvas.getContext('2d');
+        let mousePosition = { x: 0, y: 0 };
+
+        // Set canvas size
+        function setCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        setCanvasSize();
+        window.addEventListener('resize', setCanvasSize);
+
+        // Track mouse position
+        document.addEventListener('mousemove', (e) => {
+            mousePosition.x = e.clientX;
+            mousePosition.y = e.clientY;
+        });
+
+        // Spider web points
+        const points = [];
+        const numPoints = 50;
+        
+        // Create points
+        for (let i = 0; i < numPoints; i++) {
+            points.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2
+            });
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Update points
+            points.forEach(point => {
+                point.x += point.vx;
+                point.y += point.vy;
+
+                // Bounce off walls
+                if (point.x < 0 || point.x > canvas.width) point.vx *= -1;
+                if (point.y < 0 || point.y > canvas.height) point.vy *= -1;
+
+                // Draw connections
+                points.forEach(otherPoint => {
+                    const distance = Math.hypot(point.x - otherPoint.x, point.y - otherPoint.y);
+                    if (distance < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(point.x, point.y);
+                        ctx.lineTo(otherPoint.x, otherPoint.y);
+                        ctx.strokeStyle = `rgba(0, 149, 255, ${1 - distance/150})`;
+                        ctx.stroke();
+                    }
+                });
+
+                // Connect to mouse
+                const mouseDistance = Math.hypot(point.x - mousePosition.x, point.y - mousePosition.y);
+                if (mouseDistance < 200) {
+                    ctx.beginPath();
+                    ctx.moveTo(point.x, point.y);
+                    ctx.lineTo(mousePosition.x, mousePosition.y);
+                    ctx.strokeStyle = `rgba(0, 149, 255, ${1 - mouseDistance/200})`;
+                    ctx.stroke();
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
